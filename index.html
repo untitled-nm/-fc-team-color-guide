@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FC 팀컬러 도감</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1220;color:#f4f7fc;font-family:Arial,sans-serif}
+header{padding:28px 8%;background:#111d31;border-bottom:1px solid #263751}
+header h1{margin:0;color:#62a5ff;font-size:28px}
+header p{color:#aabbd2}
+main{max-width:1050px;margin:35px auto;padding:0 20px}
+.panel{background:#142239;border:1px solid #293d5b;border-radius:16px;padding:24px;margin-bottom:22px}
+h2{margin-top:0}
+.stats{display:flex;flex-wrap:wrap;gap:9px}
+.stat{background:#20334e;border:1px solid #395273;color:white;padding:11px 15px;border-radius:9px;cursor:pointer}
+.stat.active{background:#2878dc;border-color:#65a8ff}
+button{cursor:pointer}
+.search{width:100%;padding:15px;background:#3987ee;color:white;border:0;border-radius:10px;font-size:16px;font-weight:bold;margin-top:20px}
+label{display:block;margin-top:17px;color:#c5d3e5}
+input[type=checkbox]{margin-right:8px}
+.card{background:#1c304d;border:1px solid #355477;border-radius:12px;padding:19px;margin-top:14px}
+.card h3{margin:0 0 12px;color:#8fc0ff}
+.tag{display:inline-block;background:#29486d;padding:5px 9px;border-radius:6px;margin:3px;font-size:12px}
+.bonus{color:#8fe0b0;font-weight:bold}
+.muted{color:#aabbd2;font-size:13px}
+footer{text-align:center;color:#8295af;padding:30px}
+</style>
+</head>
+<body>
+<header>
+<h1>⚽ FC 팀컬러 도감</h1>
+<p>원하는 능력치를 선택하고 나에게 맞는 팀컬러를 찾아보세요.</p>
+</header>
+<main>
+<section class="panel">
+<h2>🔎 능력치 검색</h2>
+<p class="muted">찾고 싶은 능력치를 여러 개 선택하세요.</p>
+<div class="stats" id="stats"></div>
+<label><input type="checkbox" id="global"> 전체 능력치 효과도 검색 조건에 포함</label>
+<button class="search" onclick="searchTeams()">팀컬러 검색하기</button>
+</section>
+<section class="panel">
+<h2>검색 결과</h2>
+<p class="muted" id="count">능력치를 선택하고 검색해 보세요.</p>
+<div id="results"></div>
+</section>
+</main>
+<footer>FC 팀컬러 도감 · V2.0</footer>
+<script>
+const statList=[
+"속력","가속력","골 결정력","슛 파워","중거리 슛",
+"위치 선정","발리슛","페널티 킥","짧은 패스","시야",
+"크로스","긴 패스","프리킥","커브","드리블",
+"볼 컨트롤","민첩성","밸런스","반응 속도","대인 수비",
+"태클","가로채기","헤더","슬라이딩 태클","몸싸움",
+"스태미너","적극성","점프","침착성","골키퍼 다이빙",
+"골키퍼 핸들링","골키퍼 킥","골키퍼 반응","골키퍼 위치 선정"
+];
+const teams=[
+{name:"바이엘 04 레버쿠젠",type:"클럽",kind:"소속",stage:"4단계",players:11,global:4,extra:{"속력":3,"가속력":3}},
+{name:"가나",type:"국가",kind:"소속",stage:"4단계",players:11,global:4,extra:{"볼 컨트롤":3,"속력":3}},
+{name:"대한민국",type:"국가",kind:"소속",stage:"4단계",players:11,global:4,extra:{"크로스":3,"긴 패스":3}}
+];
+const selected=new Set();
+const stats=document.getElementById("stats");
+statList.forEach(s=>{
+ const b=document.createElement("button");
+ b.className="stat";b.textContent=s;
+ b.onclick=()=>{
+  if(selected.has(s)){selected.delete(s);b.classList.remove("active")}
+  else{selected.add(s);b.classList.add("active")}
+ };
+ stats.appendChild(b);
+});
+function searchTeams(){
+ const chosen=[...selected];
+ if(!chosen.length){document.getElementById("count").textContent="능력치를 하나 이상 선택해 주세요.";document.getElementById("results").innerHTML="";return}
+ const includeGlobal=document.getElementById("global").checked;
+ const found=teams.filter(t=>chosen.every(s=>(t.extra[s]||0)>0||(includeGlobal&&t.global>0)));
+ document.getElementById("count").textContent=`선택 능력치: ${chosen.join(", ")} · 검색 결과 ${found.length}개`;
+ document.getElementById("results").innerHTML=found.length?found.map(t=>`
+ <div class="card">
+ <h3>${t.name}</h3>
+ <span class="tag">${t.kind}</span><span class="tag">${t.type}</span><span class="tag">${t.stage}</span>
+ <p>적용 선수 수: ${t.players}명</p>
+ <p>전체 능력치 <b class="bonus">+${t.global}</b></p>
+ <p>개별 능력치: ${Object.entries(t.extra).map(([s,v])=>`${s} +${v}`).join(" · ")}</p>
+ </div>`).join(""):`<p class="muted">조건에 맞는 팀컬러가 없습니다.</p>`;
+}
+</script>
+</body>
+</html>
